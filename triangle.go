@@ -20,7 +20,7 @@ func main() {
 	c, err := strconv.Atoi(os.Args[3])
 	panicErr(err)
 
-	triangle(a, b, c)
+	fmt.Println(triangle(a, b, c))
 }
 
 func panicErr(err error) {
@@ -31,28 +31,43 @@ func panicErr(err error) {
 }
 
 func triangle(a, b, c int) string {
-	fmt.Println("input", a, b, c)
+	fmt.Println("input:", a, b, c)
 	
-	if a + b <= c || b + c <= a || a + c <= b {
-		fmt.Println("not a triangle\n----------")
+	if !isValidTriangle(a, b, c) {
 		return "not a triangle"
 	}
 
-	if a < 1 || b < 1 || c < 1 {
-		fmt.Println("not a triangle\n----------")
-		return "not a triangle"
-	}
-
-	if a == b && b == c { // then a == c -> equilateral
-		fmt.Println("equilateral\n----------")
+	if isEquilateral(a, b, c) {
 		return "equilateral"
 	}
 
-	if a == b || b == c || a == c {
-		fmt.Println("isosceles\n----------")
+	if isIsosceles(a, b, c) {
 		return "isosceles"
 	}
 
-	fmt.Println("scalene\n----------")
 	return "scalene"
+}
+
+func isValidTriangle(a, b, c int) bool {
+	if a + b <= c || b + c <= a || a + c <= b {
+		return false
+	}
+	if a < 1 || b < 1 || c < 1 {
+		return false
+	}
+	return true
+}
+
+func isEquilateral(a, b, c int) bool {
+	if a == b && b == c { // then a == c -> equilateral
+		return true
+	}
+	return false
+}
+
+func isIsosceles(a, b, c int) bool {
+	if a == b || b == c || a == c {
+		return true
+	}
+	return false
 }
