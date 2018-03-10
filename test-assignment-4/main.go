@@ -8,57 +8,57 @@ import (
 	"os"
 )
 
-type bank interface {
+type Bank interface {
 	// adds an account
-	addAccount(*account)
+	AddAccount(*Account)
 
 	// withdraw amount, returns balance or err
-	withdraw(*account, float64) (float64, error)
+	Withdraw(*Account, float64) (float64, error)
 
 	// deposit amount, returns balance
-	deposit(*account, float64) float64
+	Deposit(*Account, float64) float64
 
 	// creates a loan for the account, returns error if loan cannot be made
-	makeLoan(*account, float64) error
+	MakeLoan(*Account, float64) error
 
 	// pays amount from the account towards the loan, returns the remaining loan amount
-	payLoan(*account, float64) float64
+	PayLoan(*Account, float64) float64
 
 	// changes name for account
-	changeAccountName(*account, string)
+	ChangeAccountName(*Account, string)
 
 	// reads all accounts from accounts.json
-	readAccounts()
+	ReadAccounts()
 
 	// returns all accounts
-	getAccounts() []*account
+	GetAccounts() []*Account
 
 	// returns accounts that have a loan
-	getLoaners() []*account
+	GetLoaners() []*Account
 
 	// return the account with most money
-	getRichest() *account
+	GetRichest() *Account
 
 	// returns all the accounts in json byte slice
-	writeAccountsJSON() error
+	WriteAccountsJSON() error
 
 	// removes an account by name
-	removeAccount(string)
+	RemoveAccount(string)
 }
 
-type account struct {
+type Account struct {
 	CreditAllowed float64
 	Balance       float64
 	Loan          float64
 	AccountName   string
 }
 
-type boremiumBank struct {
+type BoremiumBank struct {
 	Balance  float64
-	Accounts []*account
+	Accounts []*Account
 }
 
-func (b *boremiumBank) withdraw(a *account, amount float64) (float64, error) {
+func (b *BoremiumBank) Withdraw(a *Account, amount float64) (float64, error) {
 	if a.Balance-amount < a.CreditAllowed {
 		return a.Balance, errors.New("not allowed")
 	}
@@ -66,16 +66,16 @@ func (b *boremiumBank) withdraw(a *account, amount float64) (float64, error) {
 	return a.Balance, nil
 }
 
-func (b *boremiumBank) addAccount(a *account) {
+func (b *BoremiumBank) AddAccount(a *Account) {
 	b.Accounts = append(b.Accounts, a)
 }
 
-func (b *boremiumBank) deposit(a *account, amount float64) float64 {
+func (b *BoremiumBank) Deposit(a *Account, amount float64) float64 {
 	a.Balance += amount
 	return a.Balance
 }
 
-func (b *boremiumBank) makeLoan(a *account, amount float64) error {
+func (b *BoremiumBank) MakeLoan(a *Account, amount float64) error {
 	if a.Loan != 0 {
 		return errors.New("not allowed")
 	}
@@ -84,24 +84,24 @@ func (b *boremiumBank) makeLoan(a *account, amount float64) error {
 	return nil
 }
 
-func (b *boremiumBank) payLoan(a *account, amount float64) float64 {
+func (b *BoremiumBank) PayLoan(a *Account, amount float64) float64 {
 	a.Loan -= amount
 	b.Balance += amount
 	return a.Loan
 }
 
-func (b *boremiumBank) changeAccountName(a *account, name string) {
+func (b *BoremiumBank) ChangeAccountName(a *Account, name string) {
 	a.AccountName = name
 }
 
-func (b *boremiumBank) readAccounts() {
+func (b *BoremiumBank) ReadAccounts() {
 	file, _ := os.Open("./accounts.json")
 	bytes, _ := ioutil.ReadAll(file)
 	json.Unmarshal(bytes, b.Accounts)
 }
 
-func (b *boremiumBank) getLoaners() []*account {
-	var loaners []*account
+func (b *BoremiumBank) GetLoaners() []*Account {
+	var loaners []*Account
 	for _, v := range b.Accounts {
 		if v.Loan > 0 {
 			loaners = append(loaners, v)
@@ -110,8 +110,8 @@ func (b *boremiumBank) getLoaners() []*account {
 	return loaners
 }
 
-func (b *boremiumBank) getRichest() *account {
-	var richest *account
+func (b *BoremiumBank) GetRichest() *Account {
+	var richest *Account
 	for _, v := range b.Accounts {
 		if richest == nil || v.Loan > 0 {
 			richest = v
@@ -120,7 +120,7 @@ func (b *boremiumBank) getRichest() *account {
 	return richest
 }
 
-func (b *boremiumBank) writeAccountsJSON() error {
+func (b *BoremiumBank) WriteAccountsJSON() error {
 	bytes, err := json.Marshal(b.Accounts)
 	if err != nil {
 		return err
@@ -133,7 +133,7 @@ func (b *boremiumBank) writeAccountsJSON() error {
 	return err
 }
 
-func (b *boremiumBank) removeAccount(name string) {
+func (b *BoremiumBank) RemoveAccount(name string) {
 	for k, v := range b.Accounts {
 		if v.AccountName == name {
 			b.Accounts = append(b.Accounts[:k], b.Accounts[:k+1]...)
@@ -141,19 +141,19 @@ func (b *boremiumBank) removeAccount(name string) {
 	}
 }
 
-func (b *boremiumBank) getAccounts() []*account {
+func (b *BoremiumBank) GetAccounts() []*Account {
 	return b.Accounts
 }
 
-func totalFunds(b bank) (sum float64) {
-	for _, v := range b.getAccounts() {
+func TotalFunds(b Bank) (sum float64) {
+	for _, v := range b.GetAccounts() {
 		sum += v.Balance
 	}
 	return
 }
 
-func printBank(b bank) {
-	for _, v := range b.getAccounts() {
+func PrintBank(b Bank) {
+	for _, v := range b.GetAccounts() {
 		log.Println(v)
 	}
 }
