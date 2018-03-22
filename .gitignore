@@ -1,3 +1,4 @@
 .idea
 java-tests/out/
 bank-tests/out/
+target/
