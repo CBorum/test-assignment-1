@@ -2,6 +2,10 @@
 package testex;
 import static com.jayway.restassured.RestAssured.given;
 import com.jayway.restassured.response.ExtractableResponse;
+import testex.jokefetching.FetcherFactory;
+import testex.jokefetching.IFetcherFactory;
+import testex.jokefetching.IJokeFetcher;
+
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -12,65 +16,11 @@ import java.util.List;
 public class JokeFetcher {
 
     private IDateFormatter dateFormatter;
+    private IFetcherFactory fetcherFactory;
 
-    public JokeFetcher(IDateFormatter dateFormatter) {
+    public JokeFetcher(IDateFormatter dateFormatter, IFetcherFactory fetcherFactory) {
         this.dateFormatter = dateFormatter;
-    }
-
-    /**
-     * These are the valid types that can be used to indicate required jokes
-     * eduprog: Contains joke related to programming and education. API only returns a new value each hour
-     * chucknorris: Fetch a chucknorris joke. Not always political correct ;-)
-     * moma: Fetch a "MOMA" joke. Defenitely never political correct ;-)
-     * tambal: Just random jokes
-     */
-    private final List<String> availableTypes = Arrays.asList("eduprog","chucknorris","moma","tambal");
-
-    private Joke getEducationalProgrammingJoke(){
-        try{
-            ExtractableResponse res =  given().get("http://jokes-plaul.rhcloud.com/api/joke").then().extract();
-            String joke = res.path("joke");
-            String reference = res.path("reference");
-            return new Joke(joke,reference);
-        }catch(Exception e){
-            return null;
-        }
-    }
-
-    private Joke getChuckNorrisJoke(){
-        try{
-            String joke  = given().get("http://api.icndb.com/jokes/random").path("value.joke");
-            return new Joke(joke,"http://api.icndb.com/");
-        }catch(Exception e){
-            return null;
-        }
-    }
-
-    private Joke getYoMommaJoke(){
-        try{
-            //API does not set response type to JSON, so we have to force the response to read as so
-            String joke = given().get("http://api.yomomma.info/").andReturn().jsonPath().getString("joke");
-            return new Joke(joke,"http://api.yomomma.info/");
-        }catch(Exception e){
-            return null;
-        }
-    }
-
-    private Joke getTambalJoke(){
-        try{
-            String joke  = given().get("http://tambal.azurewebsites.net/joke/random").path("joke");
-            return new Joke(joke,"http://tambal.azurewebsites.net/joke/random");
-        }catch(Exception e){
-            return null;
-        }
-    }
-
-    /**
-     * The valid string values to use in a call to getJokes(..)
-     * @return All the valid strings that can be used
-     */
-    public List<String> getAvailableTypes(){
-        return availableTypes;
+        this.fetcherFactory = fetcherFactory;
     }
 
     /**
@@ -81,7 +31,7 @@ public class JokeFetcher {
     boolean isStringValid(String jokeTokens){
         String[] tokens = jokeTokens.split(",");
         for(String token: tokens){
-            if(!availableTypes.contains(token)){
+            if(!fetcherFactory.getAvailableTypes().contains(token)){
                 return false;
             }
         }
@@ -97,22 +47,17 @@ public class JokeFetcher {
      * (the jokes list can contain null values, if a server did not respond correctly)
      * @throws JokeException. Thrown if either of the two input arguments contains illegal values
      */
-    public Jokes getJokes(String jokesToFetch, String timeZone) throws JokeException{
+    public Jokes getJokes(String jokesToFetch, String timeZone) throws JokeException {
+        // checkIfValidToken(jokesToFetch);
         if(!isStringValid(jokesToFetch)){
             throw new JokeException("Inputs (jokesToFetch) contain types not recognized");
         }
-        String[] tokens = jokesToFetch.split(",");
         Jokes jokes = new Jokes();
-        for(String token : tokens){
-            switch(token){
-                case "eduprog" : jokes.addJoke(getEducationalProgrammingJoke());break;
-                case "chucknorris" : jokes.addJoke(getChuckNorrisJoke());break;
-                case "moma" : jokes.addJoke(getYoMommaJoke());break;
-                case "tambal" : jokes.addJoke(getTambalJoke());break;
-            }
+        for (IJokeFetcher fetcher : fetcherFactory.getJokeFetchers(jokesToFetch)) {
+            jokes.addJoke(fetcher.getJoke());
         }
-        String timeZoneString = dateFormatter.getFormattedDate(timeZone, new Date());
-        jokes.setTimeZoneString(timeZoneString);
+        String tzString = dateFormatter.getFormattedDate(timeZone, new Date());
+        jokes.setTimeZoneString(tzString);
         return jokes;
     }
 
@@ -121,7 +66,7 @@ public class JokeFetcher {
      * @param args
      */
     public static void main(String[] args) throws JokeException {
-        JokeFetcher jf = new JokeFetcher(new DateFormatter());
+        JokeFetcher jf = new JokeFetcher(new DateFormatter(), new FetcherFactory());
         Jokes jokes = jf.getJokes("eduprog,chucknorris,chucknorris,moma,tambal","Europe/Copenhagen");
         jokes.getJokes().forEach((joke) -> {
             System.out.println(joke);
