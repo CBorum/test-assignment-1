@@ -6,10 +6,6 @@ import (
 	"time"
 )
 
-func init() {
-	println("💩")
-}
-
 type monopolyPlayer interface {
 	getPiece() *piece
 }
@@ -60,11 +56,8 @@ func (p *piece) setLocation(newLoc int) {
 func takeTurn(p monopolyPlayer, d monopolyDice) {
 	diceVal := d.roll()
 	diceVal += d.roll() // a) Calculating a random number total between 2 and 12 (the range of two dice)
-	println("dice value:", diceVal)
 	mPiece := p.getPiece()
 	move(mPiece, diceVal)
-	println("new postition", p.getPiece().getLocation())
-	println("👌")
 }
 
 func (d *dice) roll() int {

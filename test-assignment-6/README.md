@@ -27,7 +27,7 @@ I added the dependency to the pom.xml file, ran maven and the changed the matche
 
 ## Project 2
 ### Test resuts:
-...
+![Test img](./images/joke-tests.png)
 
 ### Code:
 The code can be found in "./jokeFetcher/..."
@@ -60,6 +60,8 @@ Some criterias should be that, all classes should be tested and atleast 80% of t
 Adding the libraries to the pom.xml file, importing the libraries and using them?
 
 ## Project 3
+### Test resuts:
+![Test img](./images/monopoly-tests.png)
 
 ### Code:
 The code can be found in "./monopoly.go" and "./monopoly_test.go"
