@@ -19,7 +19,7 @@ afterAll(async () => {
     try {
         await axios.get('http://localhost:3000/reset')
     } catch (e) {
-        console.log('axios error')
+        // console.log('axios error')
     }
 })
 
