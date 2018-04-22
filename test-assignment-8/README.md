@@ -7,7 +7,7 @@ This project is made by extending another exercise by implementing the queries i
 
 ## Test cases
 |Test Case| Test case description | Expected results |
-|---|---|---|---|---|
+|---|---|---|
 | 1 | Test that the query that should return tracks with the genreid 18 & 20 works correctly | Expect the length to be 39, and the id of the last item 3237 |
 | 2 | Test that the query that should return invoices that are cheaper than 10 dollars and the invoices that are more expensive than 5 dollars works correctly | Expect the length to be 115 and the id of the last item is 319 |
 
